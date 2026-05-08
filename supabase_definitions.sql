@@ -45,6 +45,26 @@ create table public.tours (
   constraint tours_name_check check ((length(name) < 100))
 ) TABLESPACE pg_default;
 
+-- Added in 20260508_notifications migration
+-- user_profile also has: notif_push_enabled boolean NOT NULL DEFAULT true,
+--                        notif_email_enabled boolean NOT NULL DEFAULT true,
+--                        notif_muted_types text[] NOT NULL DEFAULT '{}'
+
+create table public.push_subscriptions (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  endpoint text not null,
+  p256dh text not null,
+  auth text not null,
+  user_agent text null,
+  created_at timestamptz not null default now (),
+  last_seen_at timestamptz not null default now (),
+  constraint push_subscriptions_pkey primary key (id),
+  constraint push_subscriptions_endpoint_key unique (endpoint)
+) TABLESPACE pg_default;
+
+create index IF not exists push_subscriptions_user_id_idx on public.push_subscriptions using btree (user_id) TABLESPACE pg_default;
+
 create view public.tours_view as
 select
   id,

@@ -12,6 +12,7 @@ import { useAuthStore } from '@/features/auth/presentation/stores/auth-store'
 import { useContactsStore } from '@/features/contacts/presentation/stores/contacts-store'
 import PhoneVerificationNotice from '@/features/friendships/presentation/components/phone-verification-notice.vue'
 import { useLocaleStore } from '@/features/i18n/presentation/stores/use-locale-store'
+import NotificationPreferencesSection from '@/features/notifications/presentation/components/notification-preferences-section.vue'
 import { useToursStore } from '@/features/tours/presentation/stores/tours-store'
 import { useUserProfileStore } from '@/features/user/presentation/stores/user-profile-store'
 import PhoneVerificationDialog from './phone-verification-dialog.vue'
@@ -210,6 +211,9 @@ async function handleSignOut() {
             </button>
           </div>
         </div>
+
+        <!-- Notification preferences -->
+        <NotificationPreferencesSection />
 
         <div class="actions">
           <button class="edit-btn" @click="startEdit">

@@ -90,6 +90,8 @@ Infrastructure:
 - Brevo for automated email workflows, e.g. sign-up/sign-in
 - Twilio for verification of phone numbers (currently free tier, so not working correctly)
 
+For enabling push and email notifications, see [services/email-hook/SETUP-NOTIFICATIONS.md](./services/email-hook/SETUP-NOTIFICATIONS.md).
+
 ## Project Structure
 
 ```
