@@ -212,8 +212,12 @@ async function handleSignOut() {
           </div>
         </div>
 
+        <hr class="divider">
+
         <!-- Notification preferences -->
         <NotificationPreferencesSection />
+
+        <hr class="divider">
 
         <div class="actions">
           <button class="edit-btn" @click="startEdit">
@@ -416,6 +420,12 @@ async function handleSignOut() {
   border-color: var(--color-primary);
   color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--color-outline-variant);
+  margin: 0;
 }
 
 .actions {

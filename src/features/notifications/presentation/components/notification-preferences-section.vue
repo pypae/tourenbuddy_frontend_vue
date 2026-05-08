@@ -12,8 +12,9 @@ const notificationsStore = useNotificationsStore()
 const { prefs, pushPermission, isLoading } = storeToRefs(notificationsStore)
 const { pushSupported, requiresPwaInstall } = useNotificationCapability()
 
-const allOff = computed(() => prefs.value !== null && !prefs.value.notifPushEnabled && !prefs.value.notifEmailEnabled)
-
+const allOff = computed(
+  () => prefs.value !== null && !prefs.value.notifPushEnabled && !prefs.value.notifEmailEnabled,
+)
 const pushDenied = computed(() => pushPermission.value === 'denied')
 
 function isTypeMuted(type: NotificationType): boolean {
@@ -21,13 +22,11 @@ function isTypeMuted(type: NotificationType): boolean {
 }
 
 function handlePushToggle(event: Event) {
-  const enabled = (event.target as HTMLInputElement).checked
-  notificationsStore.setPushEnabled(enabled)
+  notificationsStore.setPushEnabled((event.target as HTMLInputElement).checked)
 }
 
 function handleEmailToggle(event: Event) {
-  const enabled = (event.target as HTMLInputElement).checked
-  notificationsStore.setEmailEnabled(enabled)
+  notificationsStore.setEmailEnabled((event.target as HTMLInputElement).checked)
 }
 
 function handleTypeToggle(type: NotificationType, event: Event) {
@@ -41,7 +40,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="notifications-section">
+  <section class="notifications-section">
     <h3 class="section-title">
       {{ t('notifications.sectionTitle') }}
     </h3>
@@ -49,83 +48,72 @@ onMounted(() => {
     <div v-if="isLoading" class="loading-placeholder" />
 
     <template v-else-if="prefs">
-      <!-- Push channel -->
-      <div class="toggle-row">
-        <div class="toggle-info">
-          <span class="toggle-label">{{ t('notifications.pushLabel') }}</span>
-          <span class="toggle-description">{{ t('notifications.pushDescription') }}</span>
-        </div>
-
-        <template v-if="requiresPwaInstall">
-          <span class="hint-text">{{ t('notifications.installHint') }}</span>
-        </template>
-        <template v-else-if="pushDenied">
-          <span class="hint-text hint-text--warning">{{ t('notifications.deniedHint') }}</span>
-        </template>
-        <template v-else-if="pushSupported">
-          <label class="toggle-switch">
+      <ul class="rows">
+        <li class="row">
+          <span class="row-label">{{ t('notifications.pushLabel') }}</span>
+          <span v-if="requiresPwaInstall" class="row-hint">
+            {{ t('notifications.installHint') }}
+          </span>
+          <span v-else-if="pushDenied" class="row-hint row-hint--warning">
+            {{ t('notifications.deniedHint') }}
+          </span>
+          <label v-else-if="pushSupported" class="switch">
             <input
               type="checkbox"
               :checked="prefs.notifPushEnabled"
               @change="handlePushToggle"
             >
-            <span class="slider" />
+            <span class="track" />
           </label>
-        </template>
-      </div>
+        </li>
 
-      <!-- Email channel -->
-      <div class="toggle-row">
-        <div class="toggle-info">
-          <span class="toggle-label">{{ t('notifications.emailLabel') }}</span>
-          <span class="toggle-description">{{ t('notifications.emailDescription') }}</span>
-        </div>
-        <label class="toggle-switch">
-          <input
-            type="checkbox"
-            :checked="prefs.notifEmailEnabled"
-            @change="handleEmailToggle"
-          >
-          <span class="slider" />
-        </label>
-      </div>
-
-      <!-- Per-type mute switches — iterates NotificationType union, auto-expands as types are added -->
-      <div class="types-section">
-        <span class="types-label">{{ t('notifications.typesLabel') }}</span>
-        <div
-          v-for="type in ALL_NOTIFICATION_TYPES"
-          :key="type"
-          class="toggle-row toggle-row--indent"
-        >
-          <span class="toggle-label">{{ t(`notifications.type.${type}`) }}</span>
-          <label class="toggle-switch">
+        <li class="row">
+          <span class="row-label">{{ t('notifications.emailLabel') }}</span>
+          <label class="switch">
             <input
               type="checkbox"
-              :checked="!isTypeMuted(type)"
-              @change="handleTypeToggle(type, $event)"
+              :checked="prefs.notifEmailEnabled"
+              @change="handleEmailToggle"
             >
-            <span class="slider" />
+            <span class="track" />
           </label>
-        </div>
+        </li>
+      </ul>
+
+      <div class="types-block" :class="{ 'types-block--disabled': allOff }">
+        <span class="types-label">{{ t('notifications.typesLabel') }}</span>
+        <ul class="rows">
+          <li
+            v-for="type in ALL_NOTIFICATION_TYPES"
+            :key="type"
+            class="row"
+          >
+            <span class="row-label">{{ t(`notifications.type.${type}`) }}</span>
+            <label class="switch" :class="{ 'switch--disabled': allOff }">
+              <input
+                type="checkbox"
+                :checked="!allOff && !isTypeMuted(type)"
+                :disabled="allOff"
+                @change="handleTypeToggle(type, $event)"
+              >
+              <span class="track" />
+            </label>
+          </li>
+        </ul>
       </div>
 
-      <!-- All-off disclaimer -->
-      <div v-if="allOff" class="disclaimer">
-        <span class="material-symbols-outlined disclaimer-icon">warning</span>
-        <p class="disclaimer-text">
-          {{ t('notifications.allOffDisclaimer') }}
-        </p>
-      </div>
+      <p v-if="allOff" class="disclaimer">
+        {{ t('notifications.allOffDisclaimer') }}
+      </p>
     </template>
-  </div>
+  </section>
 </template>
 
 <style scoped>
 .notifications-section {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .section-title {
@@ -136,80 +124,73 @@ onMounted(() => {
   letter-spacing: 0.05em;
 }
 
-.toggle-row {
+.rows {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-md);
+  min-height: 40px;
+  padding: var(--spacing-xs) 0;
 }
 
-.toggle-row--indent {
-  padding-left: var(--spacing-md);
+.row-label {
+  font-size: var(--font-size-base);
+  color: var(--color-on-surface);
+  flex: 1;
+  min-width: 0;
 }
 
-.toggle-info {
+.row-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-on-surface-variant);
+  text-align: right;
+  max-width: 60%;
+  line-height: 1.35;
+}
+
+.row-hint--warning {
+  color: var(--color-error);
+}
+
+.types-block {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  margin-top: var(--spacing-xs);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-outline-variant);
+  transition: opacity 0.2s;
 }
 
-.toggle-label {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-on-surface);
-}
-
-.toggle-description {
-  font-size: var(--font-size-sm);
-  color: var(--color-on-surface-variant);
-}
-
-.types-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
+.types-block--disabled {
+  opacity: 0.5;
 }
 
 .types-label {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-on-surface-variant);
-}
-
-.hint-text {
-  font-size: var(--font-size-sm);
-  color: var(--color-on-surface-variant);
-  max-width: 180px;
-  text-align: right;
-}
-
-.hint-text--warning {
-  color: var(--color-error);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .disclaimer {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  background-color: var(--color-error-container, #fef2f2);
-  border-radius: var(--radius-sm);
-}
-
-.disclaimer-icon {
-  font-size: 20px;
-  color: var(--color-error);
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.disclaimer-text {
-  font-size: var(--font-size-sm);
-  color: var(--color-on-surface);
+  font-size: var(--font-size-xs);
+  color: var(--color-on-surface-variant);
+  line-height: 1.4;
+  margin: 0;
 }
 
 .loading-placeholder {
-  height: 120px;
+  height: 96px;
   border-radius: var(--radius-sm);
   background-color: var(--color-surface-variant);
   animation: pulse 1.5s ease-in-out infinite;
@@ -225,47 +206,54 @@ onMounted(() => {
   }
 }
 
-/* Toggle switch */
-.toggle-switch {
+/* Sleek switch */
+.switch {
   position: relative;
   display: inline-block;
-  width: 44px;
-  height: 24px;
+  width: 38px;
+  height: 22px;
   flex-shrink: 0;
 }
 
-.toggle-switch input {
+.switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.slider {
+.track {
   position: absolute;
   inset: 0;
   background-color: var(--color-outline-variant);
-  border-radius: 24px;
-  transition: background-color 0.2s;
+  border-radius: 22px;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.slider::before {
+.track::before {
   content: '';
   position: absolute;
+  top: 2px;
+  left: 2px;
   height: 18px;
   width: 18px;
-  left: 3px;
-  bottom: 3px;
   background-color: white;
   border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s;
 }
 
-input:checked + .slider {
+input:checked + .track {
   background-color: var(--color-primary);
 }
 
-input:checked + .slider::before {
-  transform: translateX(20px);
+input:checked + .track::before {
+  transform: translateX(16px);
+}
+
+.switch--disabled .track,
+input:disabled + .track {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 </style>
