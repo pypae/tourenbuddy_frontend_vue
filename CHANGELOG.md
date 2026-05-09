@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.2](https://github.com/sekael/tourenbuddy_frontend_vue/compare/tourenbuddy-frontend-v0.15.1...tourenbuddy-frontend-v0.15.2) (2026-05-09)
+
+
+### Bug Fixes
+
+* Github templates and current Supabase definitions ([#127](https://github.com/sekael/tourenbuddy_frontend_vue/issues/127)) ([5538100](https://github.com/sekael/tourenbuddy_frontend_vue/commit/55381005c9933be33476b46b5414361af22accc5))
+
 ## [0.15.1](https://github.com/sekael/tourenbuddy_frontend_vue/compare/tourenbuddy-frontend-v0.15.0...tourenbuddy-frontend-v0.15.1) (2026-05-08)
 
 
